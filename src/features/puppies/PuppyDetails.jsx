@@ -3,13 +3,27 @@
  * Shows comprehensive information about the selected puppy, if there is one.
  * Also provides a button for users to remove the selected puppy from the roster.
  */
+
+import PropTypes from "prop-types";
+import { useGetPuppyQuery, useDeletePuppyMutation } from "/src/features/puppies/puppySlice.js";
+
 export default function PuppyDetails({ selectedPuppyId, setSelectedPuppyId }) {
   // TODO: Grab data from the `getPuppy` query
+  const { data: puppy, isLoading } = useGetPuppyQuery(selectedPuppyId, {
+    skip: !selectedPuppyId, // Skip the query if no puppy is selected
+  });
 
   // TODO: Use the `deletePuppy` mutation to remove a puppy when the button is clicked
 
-  function removePuppy(id) {
-    setSelectedPuppyId();
+  const [deletePuppy] = useDeletePuppyMutation();
+
+  async function removePuppy(id) {
+    try {
+      await deletePuppy(id).unwrap();
+      setSelectedPuppyId(); // Clear selection after deletion
+    } catch (err) {
+      console.error("Failed to delete puppy:", err);
+    }
   }
 
   // There are 3 possibilities:
@@ -48,3 +62,9 @@ export default function PuppyDetails({ selectedPuppyId, setSelectedPuppyId }) {
     </aside>
   );
 }
+
+// Add PropTypes for validation
+PuppyDetails.propTypes = {
+  selectedPuppyId: PropTypes.number,
+  setSelectedPuppyId: PropTypes.func.isRequired,
+};

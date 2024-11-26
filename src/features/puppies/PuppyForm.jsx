@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAddPuppyMutation } from "/src/features/puppies/puppySlice.js";
 
 /**
  * @component
@@ -8,13 +9,25 @@ export default function PuppyForm() {
   const [name, setName] = useState("");
   const [breed, setBreed] = useState("");
 
-  // TODO: Use the `addPuppy` mutation to add a puppy when the form is submitted
+  // Use the `addPuppy` mutation
+  const [addPuppy, { isLoading, error }] = useAddPuppyMutation();
 
-  function postPuppy(event) {
+  async function postPuppy(event) {
     event.preventDefault();
 
-    // Placeholder image w/ random photos of dogs
+    // Placeholder image with random dog photos
     const imageUrl = "https://loremflickr.com/200/300/dog";
+
+    try {
+      // Call the `addPuppy` mutation with form data
+      await addPuppy({ name, breed, imageUrl }).unwrap();
+
+      // Reset form fields after successful submission
+      setName("");
+      setBreed("");
+    } catch (err) {
+      console.error("Failed to add puppy:", err);
+    }
   }
 
   return (
